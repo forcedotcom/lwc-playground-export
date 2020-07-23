@@ -1,6 +1,6 @@
-# playground-export
+# Playground Export CLI Plugin
 
-This is a CLI plugin to download your LWC Playground projects and optionally convert them to an SFDX project.
+This is a CLI plugin to download your [LWC Playground](https://developer.salesforce.com/docs/component-library/tools/playground) projects and optionally convert them to an SFDX project.
 
 To install the plugin run:
 
@@ -8,7 +8,7 @@ To install the plugin run:
 $ sfdx plugin:install playground-export
 ```
 
-To export a project to a folder run:
+To export a project to a folder run the following. The <ID> value is found in the url: `https://developer.salesforce.com/docs/component-library/tools/playground/<ID>/1/edit`
 
 ```
 $ sfdx playground:export -i <ID> --name myproj
