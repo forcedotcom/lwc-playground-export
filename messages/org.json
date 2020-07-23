@@ -1,0 +1,5 @@
+{
+  "commandDescription": "print a greeting and your org IDs",
+  "projectFlagDescription": "the project to download",
+  "nameFlagDescription": "The name of your project"
+}
