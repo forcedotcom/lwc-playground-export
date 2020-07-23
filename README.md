@@ -30,27 +30,34 @@ USAGE
 ```
 <!-- usagestop -->
 <!-- commands -->
-* [`sfdx playground:export -p <string> [-n <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-playgroundexport--p-string--n-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
+* [`sfdx playground:export -i <string> [-n <string>] [-p] [--internal] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-playgroundexport--i-string--n-string--p---internal---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 
-## `sfdx playground:export -p <string> [-n <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+## `sfdx playground:export -i <string> [-n <string>] [-p] [--internal] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 print a greeting and your org IDs
 
 ```
 USAGE
-  $ sfdx playground:export -p <string> [-n <string>] [--json] [--loglevel 
+  $ sfdx playground:export -i <string> [-n <string>] [-p] [--internal] [--json] [--loglevel 
   trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
 OPTIONS
+  -i, --id=id                                                                       (required) the project to download
   -n, --name=name                                                                   The name of your project
-  -p, --project=project                                                             (required) the project to download
+  -p, --project                                                                     Use an SFDX project type
+
+  --internal                                                                        Use the internal version of
+                                                                                    playground
+
   --json                                                                            format output as json
 
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
                                                                                     this command invocation
 
-EXAMPLE
-  $ sfdx playground:export --project 7yD2PkxT7
+EXAMPLES
+  $ sfdx playground:export --id 7yD2PkxT7
+  $ sfdx playground:export --id 7yD2PkxT7 --name MyProject
+  $ sfdx playground:export --id 7yD2PkxT7 --project
 ```
 
 _See code: [lib/commands/playground/export.js](https://github.com/ntotten/lwc-playground-export/blob/v1.0.0/lib/commands/playground/export.js)_

@@ -1,0 +1,7 @@
+{
+  "commandDescription": "print a greeting and your org IDs",
+  "idFlagDescription": "the id of the project to download. The url is like https://developer.salesforce.com/docs/component-library/tools/playground/<id>/1/edit",
+  "nameFlagDescription": "The name of your project",
+  "projectFlagDescription": "Use an SFDX project type",
+  "internalFlagDescription": "Use the internal version of playground"
+}

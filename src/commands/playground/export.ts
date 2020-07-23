@@ -6,6 +6,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { promisify } from "util";
 import { exec } from "child_process";
+import * as process from "process";
 
 const mkdir = promisify(fs.mkdir);
 const writeFile = promisify(fs.writeFile);
@@ -15,7 +16,7 @@ Messages.importMessagesDirectory(__dirname);
 
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages("playground-export", "org");
+const messages = Messages.loadMessages("playground-export", "export");
 
 interface ProjectFileTree {
   name: string;
@@ -49,20 +50,31 @@ interface Project {
 export default class Org extends SfdxCommand {
   public static description = messages.getMessage("commandDescription");
 
-  public static examples = ["$ sfdx playground:export --project 7yD2PkxT7"];
+  public static examples = [
+    "$ sfdx playground:export --id 7yD2PkxT7",
+    "$ sfdx playground:export --id 7yD2PkxT7 --name MyProject",
+    "$ sfdx playground:export --id 7yD2PkxT7 --project",
+  ];
 
   public static args = [{ name: "file" }];
 
   protected static flagsConfig = {
     // flag with a value (-p, --project=VALUE)
-    project: flags.string({
-      char: "p",
-      description: messages.getMessage("projectFlagDescription"),
+    id: flags.string({
+      char: "i",
+      description: messages.getMessage("idFlagDescription"),
       required: true,
     }),
     name: flags.string({
       char: "n",
       description: messages.getMessage("nameFlagDescription"),
+    }),
+    project: flags.boolean({
+      char: "p",
+      description: messages.getMessage("projectFlagDescription"),
+    }),
+    internal: flags.boolean({
+      description: messages.getMessage("internalFlagDescription"),
     }),
   };
 
@@ -76,28 +88,52 @@ export default class Org extends SfdxCommand {
   protected static requiresProject = false;
 
   public async run(): Promise<AnyJson> {
-    const id = this.flags.project;
-    const name = this.flags.name;
+    const { id, name } = this.flags;
+    const isSfdx = this.flags.project;
 
     this.log(`Downloading project ${id}...`);
 
-    const res = await fetch(
-      `https://d3nm9grey5nsoo.cloudfront.net/api/projects/${id}`
-    );
-    const project = await res.json();
+    let host = this.flags.internal
+      ? "playground.lwcjs.org"
+      : "d3nm9grey5nsoo.cloudfront.net";
 
-    const output = await promisify(exec)(
-      `sfdx force:project:create -n ${name || id} --json`
-    );
+    const res = await fetch(`https://${host}/api/projects/${id}`);
+    const exported = await res.json();
 
-    const {
-      result: { outputDir },
-    } = JSON.parse(output.stdout);
+    let projectName = name || id;
 
-    this.log(`Project created at ${outputDir}`);
+    let rootDir: string;
+    if (isSfdx) {
+      const output = await promisify(exec)(
+        `sfdx force:project:create -n ${name || id} --json`
+      );
+
+      const {
+        result: { outputDir },
+      } = JSON.parse(output.stdout);
+
+      rootDir = path.join(
+        outputDir,
+        projectName,
+        "force-app",
+        "main",
+        "default",
+        "lwc"
+      );
+
+      this.log(`Project created at ${path.join(outputDir, projectName)}`);
+    } else {
+      rootDir = path.join(process.cwd(), projectName);
+      try {
+        await mkdir(rootDir);
+        this.log(`Project created at ${rootDir}`);
+      } catch (err) {
+        this.log(JSON.stringify(err));
+      }
+    }
 
     try {
-      await this.writeProject(path.join(outputDir, name || id), project);
+      await this.writeProject(rootDir, exported, isSfdx);
     } catch (err) {
       this.log(JSON.stringify(err));
     }
@@ -105,11 +141,17 @@ export default class Org extends SfdxCommand {
     return { id };
   }
 
-  private async writeProject(rootDir: string, project: Project) {
-    const lwcDir = path.join(rootDir, "force-app", "main", "default", "lwc");
+  private async writeProject(
+    rootDir: string,
+    project: Project,
+    isSfdx: boolean
+  ) {
     project.data.fileTree?.children?.forEach((node) => {
-      if (node.name !== "main.js") {
-        this.writeNode(lwcDir, node);
+      if (node.name === "main.js" && !isSfdx) {
+        // Only write the main.js for non-sfdx projects
+        this.writeNode(rootDir, node);
+      } else {
+        this.writeNode(rootDir, node);
       }
     });
   }
