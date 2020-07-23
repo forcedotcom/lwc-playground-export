@@ -54,7 +54,7 @@ export default class Org extends SfdxCommand {
   public static examples = [
     "$ sfdx playground:export --id 7yD2PkxT7",
     "$ sfdx playground:export --id 7yD2PkxT7 --name MyProject",
-    "$ sfdx playground:export --id 7yD2PkxT7 --project",
+    "$ sfdx playground:export --id 7yD2PkxT7 --template sfdx",
   ];
 
   public static args = [{ name: "file" }];
@@ -70,9 +70,8 @@ export default class Org extends SfdxCommand {
       char: "n",
       description: messages.getMessage("nameFlagDescription"),
     }),
-    project: flags.boolean({
-      char: "p",
-      description: messages.getMessage("projectFlagDescription"),
+    template: flags.string({
+      description: messages.getMessage("templateFlagDescription"),
     }),
     internal: flags.boolean({
       description: messages.getMessage("internalFlagDescription"),
@@ -92,9 +91,9 @@ export default class Org extends SfdxCommand {
   protected static requiresProject = false;
 
   public async run(): Promise<AnyJson> {
-    const { id, name, remote, internal } = this.flags;
-    const isSfdx = this.flags.project;
+    const { id, name, remote, internal, template } = this.flags;
 
+    this.log(`Creating project with template ${template}.`);
     this.log(`Downloading project ${id}...`);
 
     let host = internal
@@ -110,28 +109,18 @@ export default class Org extends SfdxCommand {
     let projectName = name || id;
 
     let rootDir: string;
-    let repoDir: string;
-    if (isSfdx) {
-      const output = await exec(
-        `sfdx force:project:create -n ${name || id} --json`
-      );
-
-      const {
-        result: { outputDir },
-      } = JSON.parse(output.stdout);
-
+    let repoDir = path.join(process.cwd(), projectName);
+    if (template === "sfdx") {
+      await exec(`sfdx force:project:create -n ${projectName} --json`);
       rootDir = path.join(
-        outputDir,
+        process.cwd(),
         projectName,
         "force-app",
         "main",
         "default",
         "lwc"
       );
-
-      repoDir = path.join(outputDir, projectName);
     } else {
-      rootDir = path.join(process.cwd(), projectName);
       repoDir = rootDir;
       try {
         await mkdir(rootDir);
@@ -143,7 +132,8 @@ export default class Org extends SfdxCommand {
     this.log(`Project created at ${repoDir}`);
 
     try {
-      await this.writeProject(rootDir, exported, isSfdx);
+      this.log(`Writing components to ${rootDir}`);
+      await this.writeProject(rootDir, exported, template);
     } catch (err) {
       this.log(JSON.stringify(err));
     }
@@ -158,11 +148,11 @@ export default class Org extends SfdxCommand {
   private async writeProject(
     rootDir: string,
     project: Project,
-    isSfdx: boolean
+    template: string
   ) {
     project.data.fileTree?.children?.forEach((node) => {
-      if (node.name === "main.js" && !isSfdx) {
-        // Only write the main.js for non-sfdx projects
+      if (node.name === "main.js" && !template) {
+        // Only write the main.js for non-teplate projects
         this.writeNode(rootDir, node);
       } else {
         this.writeNode(rootDir, node);
@@ -185,7 +175,7 @@ export default class Org extends SfdxCommand {
     try {
       this.log(`Pushing repository to ${remote}`);
       await exec(
-        `cd ${rootDir} && git init && git remote add origin ${remote} && git add -A && git commit -m "Exported source" && git checkout -b main && git push --set-upstream origin main --force`
+        `cd ${rootDir} && git init && git remote add origin ${remote} && git add -A && git commit -m "Exported source" && git checkout -b main && git push --set-upstream origin main`
       );
     } catch (err) {
       this.log(err.stderrd);

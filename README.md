@@ -2,17 +2,37 @@
 
 This is a CLI plugin to download your LWC Playground projects and optionally convert them to an SFDX project.
 
-To use this plugin run the following:
+To install the plugin run:
 
-````
+```
 $ sfdx plugin:install playground-export
+```
+
+To export a project to a folder run:
+
+```
 $ sfdx playground:export -i <ID> --name myproj
+```
+
+If you want to have the project pushed to a git repo set the remote flag.
+
+```
+$ sfdx playground:export -i <ID> --name myproj --remote https://github.com/username/repo
+```
+
+If you want to export the modules as a SFDX project set the template flag.
+
+```
+$ sfdx playground:export -i <ID> --name myproj --template sfdx
+```
 
 <!-- toc -->
-* [playground-export](#playground-export)
-<!-- tocstop -->
-  <!-- install -->
-  <!-- usage -->
+
+- [playground-export](#playground-export)
+  <!-- tocstop -->
+    <!-- install -->
+    <!-- usage -->
+
 ```sh-session
 $ npm install -g playground-export
 $ sfdx COMMAND
@@ -24,18 +44,20 @@ USAGE
   $ sfdx COMMAND
 ...
 ```
+
 <!-- usagestop -->
 <!-- commands -->
-* [`sfdx playground:export -i <string> [-n <string>] [-p] [--internal] [--remote <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-playgroundexport--i-string--n-string--p---internal---remote-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 
-## `sfdx playground:export -i <string> [-n <string>] [-p] [--internal] [--remote <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+- [`sfdx playground:export -i <string> [-n <string>] [--template <string>] [--internal] [--remote <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-playgroundexport--i-string--n-string---template-string---internal---remote-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
+
+## `sfdx playground:export -i <string> [-n <string>] [--template <string>] [--internal] [--remote <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
 print a greeting and your org IDs
 
 ```
 USAGE
-  $ sfdx playground:export -i <string> [-n <string>] [-p] [--internal] [--remote <string>] [--json] [--loglevel 
-  trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+  $ sfdx playground:export -i <string> [-n <string>] [--template <string>] [--internal] [--remote <string>] [--json]
+  [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
 OPTIONS
   -i, --id=id                                                                       (required) the id of the project to
@@ -45,8 +67,6 @@ OPTIONS
                                                                                     /<id>/1/edit
 
   -n, --name=name                                                                   The name of your project
-
-  -p, --project                                                                     Use an SFDX project type
 
   --internal                                                                        Use the internal version of
                                                                                     playground
@@ -59,11 +79,15 @@ OPTIONS
   --remote=remote                                                                   The url of the git repository that
                                                                                     you want to push your project to
 
+  --template=template                                                               The template to use: sfdx or lwc
+
 EXAMPLES
   $ sfdx playground:export --id 7yD2PkxT7
   $ sfdx playground:export --id 7yD2PkxT7 --name MyProject
-  $ sfdx playground:export --id 7yD2PkxT7 --project
+  $ sfdx playground:export --id 7yD2PkxT7 --template sfdx
+  $ sfdx playground:export --id 7yD2PkxT7 --template lwc
 ```
 
 _See code: [lib/commands/playground/export.js](https://github.com/ntotten/lwc-playground-export/blob/v1.0.0/lib/commands/playground/export.js)_
+
 <!-- commandsstop -->
