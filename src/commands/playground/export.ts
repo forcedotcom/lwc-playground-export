@@ -5,11 +5,12 @@ import fetch from "node-fetch";
 import * as fs from "fs";
 import * as path from "path";
 import { promisify } from "util";
-import { exec } from "child_process";
+import * as child_process from "child_process";
 import * as process from "process";
 
 const mkdir = promisify(fs.mkdir);
 const writeFile = promisify(fs.writeFile);
+const exec = promisify(child_process.exec);
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -76,6 +77,9 @@ export default class Org extends SfdxCommand {
     internal: flags.boolean({
       description: messages.getMessage("internalFlagDescription"),
     }),
+    remote: flags.string({
+      description: messages.getMessage("remoteFlagDescription"),
+    }),
   };
 
   // Comment this out if your command does not require an org username
@@ -88,23 +92,27 @@ export default class Org extends SfdxCommand {
   protected static requiresProject = false;
 
   public async run(): Promise<AnyJson> {
-    const { id, name } = this.flags;
+    const { id, name, remote, internal } = this.flags;
     const isSfdx = this.flags.project;
 
     this.log(`Downloading project ${id}...`);
 
-    let host = this.flags.internal
+    let host = internal
       ? "playground.lwcjs.org"
       : "d3nm9grey5nsoo.cloudfront.net";
 
+    if (internal) {
+      process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+    }
     const res = await fetch(`https://${host}/api/projects/${id}`);
     const exported = await res.json();
 
     let projectName = name || id;
 
     let rootDir: string;
+    let repoDir: string;
     if (isSfdx) {
-      const output = await promisify(exec)(
+      const output = await exec(
         `sfdx force:project:create -n ${name || id} --json`
       );
 
@@ -121,21 +129,27 @@ export default class Org extends SfdxCommand {
         "lwc"
       );
 
-      this.log(`Project created at ${path.join(outputDir, projectName)}`);
+      repoDir = path.join(outputDir, projectName);
     } else {
       rootDir = path.join(process.cwd(), projectName);
+      repoDir = rootDir;
       try {
         await mkdir(rootDir);
-        this.log(`Project created at ${rootDir}`);
       } catch (err) {
         this.log(JSON.stringify(err));
       }
     }
 
+    this.log(`Project created at ${repoDir}`);
+
     try {
       await this.writeProject(rootDir, exported, isSfdx);
     } catch (err) {
       this.log(JSON.stringify(err));
+    }
+
+    if (remote) {
+      await this.pushGit(repoDir, remote);
     }
 
     return { id };
@@ -164,6 +178,17 @@ export default class Org extends SfdxCommand {
       const cmpDir = path.join(parentDir, node.name);
       await mkdir(cmpDir);
       node.children?.forEach((node) => this.writeNode(cmpDir, node));
+    }
+  }
+
+  private async pushGit(rootDir: string, remote: string) {
+    try {
+      this.log(`Pushing repository to ${remote}`);
+      await exec(
+        `cd ${rootDir} && git init && git remote add origin ${remote} && git add -A && git commit -m "Exported source" && git checkout -b main && git push --set-upstream origin main --force`
+      );
+    } catch (err) {
+      this.log(err.stderrd);
     }
   }
 }
