@@ -2,6 +2,8 @@
 
 This is a CLI plugin to download your [LWC Playground](https://developer.salesforce.com/docs/component-library/tools/playground) projects and optionally convert them to an SFDX project.
 
+## Usage
+
 To install the plugin run:
 
 ```
@@ -26,9 +28,11 @@ If you want to export the modules as a SFDX project set the template flag.
 $ sfdx playground:export -i <ID> --name myproj --template sfdx
 ```
 
+## Documentation
+
 <!-- toc -->
 
-- [playground-export](#playground-export)
+- [Playground Export CLI Plugin](#playground-export-cli-plugin)
   <!-- tocstop -->
     <!-- install -->
     <!-- usage -->
@@ -38,7 +42,7 @@ $ npm install -g playground-export
 $ sfdx COMMAND
 running command...
 $ sfdx (-v|--version|version)
-playground-export/1.0.0 darwin-x64 node-v12.18.1
+playground-export/1.1.0 darwin-x64 node-v12.18.1
 $ sfdx --help [COMMAND]
 USAGE
   $ sfdx COMMAND
@@ -79,15 +83,15 @@ OPTIONS
   --remote=remote                                                                   The url of the git repository that
                                                                                     you want to push your project to
 
-  --template=template                                                               The template to use: sfdx or lwc
+  --template=template                                                               The template to use. valid options
+                                                                                    are sfdx and none
 
 EXAMPLES
   $ sfdx playground:export --id 7yD2PkxT7
   $ sfdx playground:export --id 7yD2PkxT7 --name MyProject
   $ sfdx playground:export --id 7yD2PkxT7 --template sfdx
-  $ sfdx playground:export --id 7yD2PkxT7 --template lwc
 ```
 
-_See code: [lib/commands/playground/export.js](https://github.com/ntotten/lwc-playground-export/blob/v1.0.0/lib/commands/playground/export.js)_
+_See code: [lib/commands/playground/export.js](https://github.com/ntotten/lwc-playground-export/blob/v1.1.0/lib/commands/playground/export.js)_
 
 <!-- commandsstop -->
