@@ -16,7 +16,7 @@ To export a project to a folder run the following. The <ID> value is found in th
 $ sfdx playground:export -i <ID> --name myproj
 ```
 
-If you want to have the project pushed to a git repo set the remote flag.
+If you want to have the project pushed to a git repo set the remote flag. Make sure this is a completely empty repository.
 
 ```
 $ sfdx playground:export -i <ID> --name myproj --remote https://github.com/username/repo
@@ -31,28 +31,24 @@ $ sfdx playground:export -i <ID> --name myproj --template sfdx
 ## Documentation
 
 <!-- toc -->
-
-- [Playground Export CLI Plugin](#playground-export-cli-plugin)
-  <!-- tocstop -->
-    <!-- install -->
-    <!-- usage -->
-
+* [Playground Export CLI Plugin](#playground-export-cli-plugin)
+<!-- tocstop -->
+      <!-- install -->
+      <!-- usage -->
 ```sh-session
 $ npm install -g playground-export
 $ sfdx COMMAND
 running command...
 $ sfdx (-v|--version|version)
-playground-export/1.1.0 darwin-x64 node-v12.18.1
+playground-export/1.2.0 darwin-x64 node-v12.18.1
 $ sfdx --help [COMMAND]
 USAGE
   $ sfdx COMMAND
 ...
 ```
-
 <!-- usagestop -->
 <!-- commands -->
-
-- [`sfdx playground:export -i <string> [-n <string>] [--template <string>] [--internal] [--remote <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-playgroundexport--i-string--n-string---template-string---internal---remote-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
+* [`sfdx playground:export -i <string> [-n <string>] [--template <string>] [--internal] [--remote <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-playgroundexport--i-string--n-string---template-string---internal---remote-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 
 ## `sfdx playground:export -i <string> [-n <string>] [--template <string>] [--internal] [--remote <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
@@ -60,7 +56,7 @@ print a greeting and your org IDs
 
 ```
 USAGE
-  $ sfdx playground:export -i <string> [-n <string>] [--template <string>] [--internal] [--remote <string>] [--json]
+  $ sfdx playground:export -i <string> [-n <string>] [--template <string>] [--internal] [--remote <string>] [--json] 
   [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
 OPTIONS
@@ -92,6 +88,5 @@ EXAMPLES
   $ sfdx playground:export --id 7yD2PkxT7 --template sfdx
 ```
 
-_See code: [lib/commands/playground/export.js](https://github.com/ntotten/lwc-playground-export/blob/v1.1.0/lib/commands/playground/export.js)_
-
+_See code: [lib/commands/playground/export.js](https://github.com/ntotten/lwc-playground-export/blob/v1.2.0/lib/commands/playground/export.js)_
 <!-- commandsstop -->

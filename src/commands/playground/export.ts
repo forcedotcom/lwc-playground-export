@@ -57,8 +57,6 @@ export default class Org extends SfdxCommand {
     "$ sfdx playground:export --id 7yD2PkxT7 --template sfdx",
   ];
 
-  public static args = [{ name: "file" }];
-
   protected static flagsConfig = {
     // flag with a value (-p, --project=VALUE)
     id: flags.string({
@@ -93,7 +91,7 @@ export default class Org extends SfdxCommand {
   public async run(): Promise<AnyJson> {
     const { id, name, remote, internal, template } = this.flags;
 
-    this.log(`Creating project with template ${template}.`);
+    this.log(`Creating project with template '${template ?? "none"}'.`);
     this.log(`Downloading project ${id}...`);
 
     let host = internal
@@ -106,7 +104,7 @@ export default class Org extends SfdxCommand {
     const res = await fetch(`https://${host}/api/projects/${id}`);
     const exported = await res.json();
 
-    let projectName = name || id;
+    let projectName = name ?? exported.title;
 
     let rootDir: string;
     let repoDir = path.join(process.cwd(), projectName);
@@ -121,28 +119,22 @@ export default class Org extends SfdxCommand {
         "lwc"
       );
     } else {
-      repoDir = rootDir;
-      try {
-        await mkdir(rootDir);
-      } catch (err) {
-        this.log(JSON.stringify(err));
-      }
+      rootDir = repoDir;
+      await mkdir(rootDir);
     }
 
-    this.log(`Project created at ${repoDir}`);
+    this.log(`Project created at ${repoDir}.`);
 
-    try {
-      this.log(`Writing components to ${rootDir}`);
-      await this.writeProject(rootDir, exported, template);
-    } catch (err) {
-      this.log(JSON.stringify(err));
-    }
+    this.log(`Writing components to ${rootDir}...`);
+    await this.writeProject(rootDir, exported, template);
 
     if (remote) {
       await this.pushGit(repoDir, remote);
     }
 
-    return { id };
+    this.log("Export complete.");
+
+    return { outputDir: repoDir };
   }
 
   private async writeProject(
@@ -173,12 +165,15 @@ export default class Org extends SfdxCommand {
 
   private async pushGit(rootDir: string, remote: string) {
     try {
-      this.log(`Pushing repository to ${remote}`);
+      this.log(`Pushing git repository at ${remote}`);
       await exec(
         `cd ${rootDir} && git init && git remote add origin ${remote} && git add -A && git commit -m "Exported source" && git checkout -b main && git push --set-upstream origin main`
       );
     } catch (err) {
       this.log(err.stderrd);
+      this.log(
+        "There was a problem pushing to your git remote. The project has been created locally only."
+      );
     }
   }
 }
