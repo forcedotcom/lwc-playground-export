@@ -7,7 +7,7 @@ This is a CLI plugin to download your [LWC Playground](https://developer.salesfo
 To install the plugin run:
 
 ```
-$ sfdx plugin:install playground-export
+$ sfdx plugins:install playground-export
 ```
 
 To export a project to a folder run the following. The <ID> value is found in the url: `https://developer.salesforce.com/docs/component-library/tools/playground/<ID>/1/edit`
